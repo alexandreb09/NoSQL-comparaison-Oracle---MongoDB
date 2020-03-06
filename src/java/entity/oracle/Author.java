@@ -2,6 +2,7 @@ package entity.oracle;
 
 
 import oracle.kv.Key;
+import oracle.kv.Value;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -52,10 +53,18 @@ public class Author {
         return lastName + "¤" + firstName + "¤" + location + "¤" + serializeBooks();
     }
 
+    /**
+     * Partial serialisation ignoring author field
+     * @return String: serialized Book class
+     */
+    public String serializePartial(){
+        return lastName + "¤" + firstName + "¤" + location;
+    }
+
     public String serializeBooks(){
         StringBuilder str = new StringBuilder();
         for (Book book: books) {
-            str.append(book.serializePartial().substring(1)).append("¤");
+            str.append(book.serializePartial()).append("¤");
         }
         if (books.size() > 0){
             return str.toString().substring(0, str.length() - 1);

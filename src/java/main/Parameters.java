@@ -6,7 +6,7 @@ public class Parameters {
     /*      CONFIG ORACLE               */
     /* ******************************** */
     public static final String STORE_NAME = "kvstore";
-    public static final String HOST_NAME = "localhost";
+    public static final String HOST_NAME = "ALEX-PC";
     public static final String HOST_PORT = "5000";
 
     /* ******************************** */
@@ -17,7 +17,7 @@ public class Parameters {
     /* ******************************** */
     /*      PARAMETERS                  */
     /* ******************************** */
-    public static final int NB_AUTHOR_PER_THREAD    = 5000;         // Nombre d'auteurs créés dans une thread
+    public static final int NB_AUTHOR_PER_THREAD    = 10;         // Nombre d'auteurs créés dans une thread
     public static final int NB_THREAD_CREATION      = 10;           // Nombre de thread dans la création des auteurs et des livres
 
     public static final int BOOK_PRICE_MIN          = 1;            // Min price

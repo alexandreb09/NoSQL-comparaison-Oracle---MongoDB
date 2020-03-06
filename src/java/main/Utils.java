@@ -55,12 +55,55 @@ public class Utils {
         Value value = Value.createValue(book.serialize().getBytes());
         kvStore.put(book.getKey(), value);
     }
+    public static void addKeyValue(KVStore kvStore, Key key, String str_value){
+        Value value = Value.createValue(str_value.getBytes());
+        kvStore.put(key, value);
+    }
 
     public static String getValueFromKey(KVStore kvStore, Key k){
         ValueVersion valueVersion = kvStore.get(k);
         Value value = valueVersion.getValue();
         byte[] tab_bytes = value.getValue();
         return new String(tab_bytes);
+    }
+
+    public static Iterator<KeyValueVersion> getAuthorIterator(KVStore kvStore, String author_name){
+        ArrayList<String> tab_key = new ArrayList<>();
+        tab_key.add(Author.AUTHOR);
+        tab_key.add(author_name);
+        Key myKey = Key.createKey(tab_key);
+        return kvStore.storeIterator(Direction.UNORDERED, 0, myKey, null, null);
+    }
+    public static Iterator<KeyValueVersion> getBookIterator(KVStore kvStore, String title){
+        ArrayList<String> tab_key = new ArrayList<>();
+        tab_key.add(Book.BOOK);
+        tab_key.add(title);
+        Key myKey = Key.createKey(tab_key);
+        return kvStore.storeIterator(Direction.UNORDERED, 0, myKey, null, null);
+    }
+
+    public static Author getAuthorFromName(String name){
+        KVStore kvStore = getKvstore();
+        Author author = new Author();
+        Iterator<KeyValueVersion> i = getAuthorIterator(kvStore, name);
+        if (i.hasNext()){
+            Key k = i.next().getKey();
+            String author_str = Utils.getValueFromKey(kvStore, k);
+            author.deserialize(author_str);
+        }
+        return author;
+    }
+
+    public static Book getBookFromTitle(String title){
+        KVStore kvStore = getKvstore();
+        Book book = new Book();
+        Iterator<KeyValueVersion> i = getBookIterator(kvStore, title);
+        if (i.hasNext()){
+            Key k = i.next().getKey();
+            String book_str = Utils.getValueFromKey(kvStore, k);
+            book.deserialize(book_str);
+        }
+        return book;
     }
 
     /**

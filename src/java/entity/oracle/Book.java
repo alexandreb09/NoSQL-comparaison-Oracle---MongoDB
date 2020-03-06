@@ -11,16 +11,16 @@ public class Book {
 
     private String title;
     private String price;
-    private Author author;
+    private ArrayList<Author> authors;
     // TODO: a book might have several author
 
     public Book(){
-        this.author = new Author();
+        this.authors = new ArrayList<>();
     }
     public Book(String title_, String price_) {
         this.title = title_;
         this.price = price_;
-        this.author = new Author();
+        this.authors = new ArrayList<>();
     }
 
     @Override
@@ -37,9 +37,8 @@ public class Book {
      *
      * @return String: serialized Book class
      */
-    // TODO: a book might have several author
     public String serialize(){
-        return title + "¤" + price + "¤" + author.getfirstName() + "¤" + author.getlastName() + "¤" + author.getlocation();
+        return title + "¤" + price + "¤" + serializeAuthors();
     }
 
     /**
@@ -50,16 +49,35 @@ public class Book {
         return title + "¤" + price;
     }
 
-    // TODO: a book might have several author
-    public void deserialize(String str_book){
-        List<String> list_fields = Arrays.asList(str_book.split("¤"));
-        if (list_fields.size() >= 2){
-            this.setTitle(list_fields.get(0));
-            this.setprice(list_fields.get(1));
+    /**
+     * Serialize the list of authors (only their lastname, firstname and location)
+     *      -> Books are ignored to avoid infinite recursion
+     * @return String: serialized authors
+     */
+    public String serializeAuthors(){
+        StringBuilder str = new StringBuilder();
+        for (Author author: authors) {
+            str.append(author.serializePartial()).append("¤");
         }
-        if (5 == list_fields.size()){
-            Author author = new Author(list_fields.get(2), list_fields.get(3), list_fields.get(4));
-            this.setAuthor(author);
+        if (authors.size() > 0){
+            return str.toString().substring(0, str.length() - 1);
+        }
+        return str.toString();
+    }
+
+
+    public void deserialize(String str_book){
+        List<String> parts = Arrays.asList(str_book.split("¤"));
+        if (parts.size() >= 2){
+            this.setTitle(parts.get(0));
+            this.setprice(parts.get(1));
+
+            if (parts.size() > 2 && (parts.size() - 2) % 3 == 0){
+                for (int i = 2; i < parts.size(); i = i + 3){
+                    Author author = new Author(parts.get(i),parts.get(i+1), parts.get(i+2));
+                    this.addAuthor(author);
+                }
+            }
         }
     }
 
@@ -94,7 +112,7 @@ public class Book {
      *      - 50% of being "C"
      */
     public void setRandomTitle(){
-        String title = "title_";
+        String title = "title_" + System.currentTimeMillis() + "_";
         float random = (new Random()).nextFloat();
         if (random < 0.1){
             title = title + "A";
@@ -115,7 +133,7 @@ public class Book {
      * @param i: livre number
      * @return Livre
      */
-    public static Book createRandomLivre(int i){
+    public static Book createRandomBook(int i){
         Book livre = new Book();
         livre.setRandomTitle();
         livre.setRandomprice();
@@ -141,11 +159,19 @@ public class Book {
         this.price = price;
     }
 
-    public Author getAuthor() {
-        return author;
+    public ArrayList<Author> getAuthors() {
+        return authors;
     }
 
-    public void setAuthor(Author author) {
-        this.author = author;
+    public void setAuthors(ArrayList<Author> author) {
+        this.authors = author;
+    }
+
+    public void addAuthor(Author author){
+        authors.add(author);
+    }
+
+    public void removeAuthor(Author author){
+        authors.remove(author);
     }
 }

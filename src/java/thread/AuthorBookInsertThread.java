@@ -51,12 +51,12 @@ public class AuthorBookInsertThread extends Thread {
     public void insert(KVStore kvStore, int i){
         // Create entities
         Author author = Author.randomAuthor(i);
-        Book book1 = Book.createRandomLivre(i);
-        Book book2 = Book.createRandomLivre(i + Parameters.BOOK_AUTHOR_MODULO);
+        Book book1 = Book.createRandomBook(i);
+        Book book2 = Book.createRandomBook(i + Parameters.BOOK_AUTHOR_MODULO);
 
         // Add "relations"
-        book1.setAuthor(author);
-        book2.setAuthor(author);
+        book1.addAuthor(author);
+        book2.addAuthor(author);
         author.addBook(book1);
         author.addBook(book2);
 

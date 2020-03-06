@@ -13,6 +13,8 @@ import java.util.concurrent.CountDownLatch;
 public class Question {
 
     public static void requete_1(){
+        String author_name;
+
         // Try creating data
         if (createData()){
             // =============================================================//
@@ -20,23 +22,23 @@ public class Question {
             //      - Generate random author name                           //
             //      - Find all books associated to this author              //
             // =============================================================//
-            long startTime, endTime, duration;
-            startTime = System.nanoTime();
-            for (int i = 0; i < Parameters.NUMBER_REQUEST; ++i){
-                // Create random author name
-                String author_name = Utils.generateRandomAuthorName();
-
-                // Perform research
-                ArrayList<Book> books = request_1_1(author_name);
-
-                if (books.size() != 2){
-                    System.out.println("INFO: " + books.size() + " books found for author name: " + author_name);
-                }
-            }
-            endTime = System.nanoTime();
-            duration = (endTime - startTime)/1000000;
-            System.out.println("Time research (1000 requests): " + duration + "ms");
-            System.out.println("Time research per request: " + duration/Parameters.NUMBER_REQUEST + "ms");
+//            long startTime, endTime, duration;
+//            startTime = System.nanoTime();
+//            for (int i = 0; i < Parameters.NUMBER_REQUEST; ++i){
+//                // Create random author name
+//                author_name = Utils.generateRandomAuthorName();
+//
+//                // Perform research
+//                ArrayList<Book> books = request_1_1(author_name);
+//
+//                if (books.size() != 2){
+//                    System.out.println("INFO: " + books.size() + " books found for author name: " + author_name);
+//                }
+//            }
+//            endTime = System.nanoTime();
+//            duration = (endTime - startTime)/1000000;
+//            System.out.println("Time research (1000 requests): " + duration + "ms");
+//            System.out.println("Time research per request: " + duration/Parameters.NUMBER_REQUEST + "ms");
 
 
 
@@ -50,9 +52,13 @@ public class Question {
             //              - Add relation                                  //
             // =============================================================//
             // Create random author name
-            String auteur_name = Utils.generateRandomAuthorName();
+            author_name = Utils.generateRandomAuthorName();
 
+            request_1_2(author_name);
 
+            // To check, call "request_1_1"
+            ArrayList<Book> books =  request_1_1(author_name);
+            System.out.println("");
         }
     }
 
@@ -81,14 +87,9 @@ public class Question {
     public static ArrayList<Book> request_1_1(String author_name){
         KVStore kvStore = Utils.getKvstore();
 
-        ArrayList<String> tab_key = new ArrayList<>();
-        tab_key.add(Author.AUTHOR);
-        tab_key.add(author_name);
-        Key myKey = Key.createKey(tab_key);
-        Iterator<KeyValueVersion> i = kvStore.storeIterator(Direction.UNORDERED, 0, myKey, null, null);
-
         ArrayList<Book> books = new ArrayList<>();
 
+        Iterator<KeyValueVersion> i = Utils.getAuthorIterator(kvStore, author_name);
         while (i.hasNext()){
             // Get key from iterator
             Key k = i.next().getKey();
@@ -104,52 +105,47 @@ public class Question {
         return books;
     }
 
-    public void request_1_2(String author_name){
+    public static void request_1_2(String author_name){
         KVStore kvStore = Utils.getKvstore();
 
-        ArrayList<Book> books = new ArrayList<>();
-
-        Iterator<KeyValueVersion> i = getAuthorIterator(kvStore, author_name);
+        Iterator<KeyValueVersion> i = Utils.getAuthorIterator(kvStore, author_name);
         while (i.hasNext()){
             // Get key from iterator
-            Key k = i.next().getKey();
+            Key key_author = i.next().getKey();
 
-            // Get string value associatd to the key
-            String str_value = Utils.getValueFromKey(kvStore, k);
+            // Get string value associated to the key
+            String author_str = Utils.getValueFromKey(kvStore, key_author);
             Author author = new Author();
-            author.deserialize(str_value);
+            author.deserialize(author_str);
 
-            books = author.getBooks();
-
-            for (Book book: books) {
+            // For each books:
+            // TODO : when the book is loaded, author are lost (need to search in DB for authors)
+            for (Book book: author.getBooks()) {
                 // Generate random Author name (from existing author)
                 String new_author_name = Utils.generateRandomAuthorName();
-                // Search this author
-                Iterator<KeyValueVersion> j = getAuthorIterator(kvStore, author_name);
+                // Search this new author
+                Iterator<KeyValueVersion> j = Utils.getAuthorIterator(kvStore, new_author_name);
                 while (j.hasNext()){
                     // Get key from iterator
                     Key key = j.next().getKey();
 
                     // Get string value associatd to the key
-                    String str_author = Utils.getValueFromKey(kvStore, k);
-                    Author new_author = new Author();
-                    new_author.deserialize(str_value);
+                    String new_author_str = Utils.getValueFromKey(kvStore, key);
+                    System.out.println("new_author_name: " + new_author_name);
 
-                    // TODO : update the value
-                    //  Author : add new Book
-                    //  Book : add new Author
+                    // Add Book at the end of the serialized Author string
+                    new_author_str = new_author_str + "¤" + book.serializePartial();
 
+                    // Update value in KVStore
+                    Utils.addKeyValue(kvStore, key, new_author_str);
+
+                    // Add this new author in the book
+                    book.addAuthor(new Author().deserialize(new_author_str));
                 }
+                // Update Book in KVStore
+                // The key isn't change => the previous value is overwritten
+                Utils.addBookInKvstore(kvStore, book);
             }
         }
-    }
-
-
-    public static Iterator<KeyValueVersion> getAuthorIterator(KVStore kvStore, String author_name){
-        ArrayList<String> tab_key = new ArrayList<>();
-        tab_key.add(Author.AUTHOR);
-        tab_key.add(author_name);
-        Key myKey = Key.createKey(tab_key);
-        return kvStore.storeIterator(Direction.UNORDERED, 0, myKey, null, null);
     }
 }
