@@ -121,6 +121,8 @@ public class Question {
             // For each books:
             // TODO : when the book is loaded, author are lost (need to search in DB for authors)
             for (Book book: author.getBooks()) {
+                Book full_book = Utils.getBookFromTitle(book.getTitle());
+
                 // Generate random Author name (from existing author)
                 String new_author_name = Utils.generateRandomAuthorName();
                 // Search this new author
@@ -140,11 +142,11 @@ public class Question {
                     Utils.addKeyValue(kvStore, key, new_author_str);
 
                     // Add this new author in the book
-                    book.addAuthor(new Author().deserialize(new_author_str));
+                    full_book.addAuthor(new Author().deserialize(new_author_str));
                 }
                 // Update Book in KVStore
                 // The key isn't change => the previous value is overwritten
-                Utils.addBookInKvstore(kvStore, book);
+                Utils.addBookInKvstore(kvStore, full_book);
             }
         }
     }

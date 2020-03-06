@@ -16,10 +16,10 @@ public class Main {
 
         // Run question 1
         Question.requete_1();
-//        Author author = Utils.getAuthorFromName("Author_83");
+//        Author author = Utils.getAuthorFromName("Author_55");
 //        Book book = Utils.getBookFromTitle(author.getBooks().get(2).getTitle());
 //
-////        Question.createData();
+//        Question.createData();
 //        Main main = new Main();
 //        main.showAllAuthors();
 
