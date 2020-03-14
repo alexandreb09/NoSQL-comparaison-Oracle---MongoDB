@@ -2,9 +2,7 @@ package entity.oracle;
 
 
 import oracle.kv.Key;
-import oracle.kv.Value;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +42,7 @@ public class Author {
         String txt = "Author: "
                 + "\n\t- LASTNAME: " + getlastName()
                 + "\n\t- FIRSTNAME: " + getfirstName()
-                + "\n\t- location: " + getlocation();
+                + "\n\t- LOCATION: " + getlocation();
         System.out.println(txt);
         return txt;
     }
@@ -76,14 +74,15 @@ public class Author {
     public Author deserialize(String str_data){
         List<String> parts = Arrays.asList(str_data.split("¤"));
         boolean success = parts.size() >= 3;
+
         if (success){
             this.setlastName(parts.get(0));
             this.setfirstName(parts.get(1));
             this.setlocation(parts.get(2));
 
-            if (parts.size() > 3 && (parts.size() - 3) % 2 == 0){
-                for (int i = 3; i < parts.size(); i = i + 2){
-                    Book book = new Book(parts.get(i),parts.get(i+1));
+            if (parts.size() > 3 && (parts.size() - 3) % 3 == 0){
+                for (int i = 3; i < parts.size(); i = i + 3){
+                    Book book = new Book(parts.get(i),parts.get(i+1), parts.get(i+2));
                     this.addBook(book);
                 }
             }
@@ -108,6 +107,7 @@ public class Author {
     public static Author randomAuthor(int i){
         return new Author("Author_" + i, "firstName_" + i, "location_" + i);
     }
+
 
     /* ************************************ */
     /* Getter - setter                      */

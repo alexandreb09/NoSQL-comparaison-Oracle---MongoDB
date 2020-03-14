@@ -11,23 +11,25 @@ public class Book {
 
     private String title;
     private String price;
+    private String category;
     private ArrayList<Author> authors;
-    // TODO: a book might have several author
 
     public Book(){
         this.authors = new ArrayList<>();
     }
-    public Book(String title_, String price_) {
+    public Book(String title_, String price_, String category_) {
         this.title = title_;
         this.price = price_;
+        this.category = category_;
         this.authors = new ArrayList<>();
     }
 
     @Override
     public String toString() {
         return "Livre{" +
-                "title='" + title + '\'' +
-                ", price='" + price + '\'' +
+                "title='" + title + "'" +
+                ", price='" + price + "'" +
+                ", category='" + category + "'" +
                 '}';
     }
 
@@ -38,7 +40,7 @@ public class Book {
      * @return String: serialized Book class
      */
     public String serialize(){
-        return title + "¤" + price + "¤" + serializeAuthors();
+        return title + "¤" + price + "¤" + category + "¤" + serializeAuthors();
     }
 
     /**
@@ -46,7 +48,7 @@ public class Book {
      * @return String: serialized Book class
      */
     public String serializePartial(){
-        return title + "¤" + price;
+        return title + "¤" + price + "¤" + category;
     }
 
     /**
@@ -68,12 +70,16 @@ public class Book {
 
     public void deserialize(String str_book){
         List<String> parts = Arrays.asList(str_book.split("¤"));
-        if (parts.size() >= 2){
-            this.setTitle(parts.get(0));
-            this.setprice(parts.get(1));
+        int n_fields_book = 3;
+        int n_fields_author = 3;
 
-            if (parts.size() > 2 && (parts.size() - 2) % 3 == 0){
-                for (int i = 2; i < parts.size(); i = i + 3){
+        if (parts.size() >= n_fields_book){
+            this.setTitle(parts.get(0));
+            this.setPrice(parts.get(1));
+            this.setCategory(parts.get(2));
+
+            if (parts.size() > n_fields_book && (parts.size() - n_fields_book) % n_fields_author == 0){
+                for (int i = n_fields_book; i < parts.size(); i = i + n_fields_author){
                     Author author = new Author(parts.get(i),parts.get(i+1), parts.get(i+2));
                     this.addAuthor(author);
                 }
@@ -81,18 +87,36 @@ public class Book {
         }
     }
 
+    /**
+     * Get a kvStore key
+     * Key build following the hierarchy:
+     *      - BOOK
+     *      - Title letter
+     *      - Price range
+     *      - Price
+     * @return Key: kvstore key
+     */
     public Key getKey(){
         ArrayList<String> tab_key = new ArrayList<>();
+
+        // Add book type
         tab_key.add(BOOK);
-        tab_key.add(this.getTitle());
-        tab_key.add(this.getprice());
+
+        // Add all important name as a key in th title
+        tab_key.add(getTitleLetter(this.getTitle()));
+
+        // compute price range
+        tab_key.add(Integer.toString(priceRangeCompute(this)));
+
+        // Add full price
+        tab_key.add(this.getPrice());
         return Key.createKey(tab_key);
     }
 
     public Book afficher(){
         String txt = "Livre: "
                 + "\n\t- TITLE: " + getTitle()
-                + "\n\t- price: " + getprice();
+                + "\n\t- price: " + getPrice();
         System.out.println(txt);
         return this;
     }
@@ -126,18 +150,33 @@ public class Book {
 
 
     /* ************************************ */
-    /* STATIC methode                       */
+    /* STATIC method                       */
     /* ************************************ */
     /**
      * Create a random Livre from a given integer
-     * @param i: livre number
      * @return Livre
      */
-    public static Book createRandomBook(int i){
-        Book livre = new Book();
-        livre.setRandomTitle();
-        livre.setRandomprice();
-        return livre;
+    public static Book createRandomBook(){
+        Book book = new Book();
+        book.setRandomTitle();
+        book.setRandomprice();
+        book.setCategory(Category.getRandomCategory());
+
+        return book;
+    }
+
+    /**
+     * Provide the last letter from the title
+     * @param title: Book title (string)
+     * @return letter: last title letter
+     */
+    public static String getTitleLetter(String title){
+        String[] title_words = title.split("_");
+        return title_words[title_words.length - 1];
+    }
+
+    public static int priceRangeCompute(Book book){
+        return Integer.parseInt(book.getPrice()) / Parameters.BOOK_PRICE_RANGE;
     }
 
     /* ************************************ */
@@ -151,11 +190,11 @@ public class Book {
         this.title = title;
     }
 
-    public String getprice() {
+    public String getPrice() {
         return price;
     }
 
-    public void setprice(String price) {
+    public void setPrice(String price) {
         this.price = price;
     }
 
@@ -173,5 +212,12 @@ public class Book {
 
     public void removeAuthor(Author author){
         authors.remove(author);
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+    public String getCategory() {
+        return this.category;
     }
 }

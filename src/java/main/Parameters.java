@@ -1,5 +1,9 @@
 package main;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.List;
+
 public class Parameters {
 
     /* ******************************** */
@@ -27,6 +31,18 @@ public class Parameters {
     // Ex. Author x has books: Book_x, Book_(x+BOOK_AUTHOR_MODULO), ...
     public static final int BOOK_AUTHOR_MODULO      = 50000;
 
-    public static final int NUMBER_REQUEST          = 1000;
+    public static final int NUMBER_REQUEST          = 100;
 
+    // Here we use 10 as we want all books with a price lower than 10
+    public static final int BOOK_PRICE_RANGE        = 10;
+
+
+    public static final int BOOK_UPDATE_PERCENT     = 10;
+    public static final String BOOK_SEARCH_LETTER   = "A";
+
+    public static final List<String> BOOKS_CATEGORY = Arrays.asList("HISTORY", "MANGA", "COMICS", "SCIENCES", "MUSIC", "SPORT", "NATURE");
+
+    // Sleeping time in MS
+    public static final int SLEEPING_TIME_MIN       = 1;
+    public static final int SLEEPING_TIME_MAX       = 500;
 }

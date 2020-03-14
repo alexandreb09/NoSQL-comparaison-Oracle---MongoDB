@@ -2,6 +2,8 @@ package main;
 
 import entity.oracle.Author;
 import entity.oracle.Book;
+import entity.oracle.Category;
+import entity.oracle.CategoryBook;
 import oracle.kv.*;
 
 import java.util.ArrayList;
@@ -27,9 +29,15 @@ public class Utils {
         Key myKey = Key.createKey(tab_key);
         cleanOneKey(myKey);
 
-        // Clean All Livres
+        // Clean All Books
         tab_key = new ArrayList<>();
         tab_key.add(Book.BOOK);
+        myKey = Key.createKey(tab_key);
+        cleanOneKey(myKey);
+
+        // Clean All Categories
+        tab_key = new ArrayList<>();
+        tab_key.add(Category.CATEGORY);
         myKey = Key.createKey(tab_key);
         cleanOneKey(myKey);
     }
@@ -77,22 +85,26 @@ public class Utils {
     public static Iterator<KeyValueVersion> getBookIterator(KVStore kvStore, String title){
         ArrayList<String> tab_key = new ArrayList<>();
         tab_key.add(Book.BOOK);
-        tab_key.add(title);
+        // Add the title as a list of important key's words
+        tab_key.add(Book.getTitleLetter(title));
         Key myKey = Key.createKey(tab_key);
         return kvStore.storeIterator(Direction.UNORDERED, 0, myKey, null, null);
     }
-
-    public static Author getAuthorFromName(String name){
-        KVStore kvStore = getKvstore();
-        Author author = new Author();
-        Iterator<KeyValueVersion> i = getAuthorIterator(kvStore, name);
-        if (i.hasNext()){
-            Key k = i.next().getKey();
-            String author_str = Utils.getValueFromKey(kvStore, k);
-            author.deserialize(author_str);
-        }
-        return author;
+    public static Iterator<KeyValueVersion> getCategoryBookIterator(KVStore kvStore){
+        ArrayList<String> tab_key = new ArrayList<>();
+        tab_key.add(Category.CATEGORY);
+        tab_key.add(Book.BOOK);
+        Key key = Key.createKey(tab_key);
+        return kvStore.storeIterator(Direction.UNORDERED, 0, key, null, null);
     }
+    public static Iterator<KeyValueVersion> getCategoryAuthorIterator(KVStore kvStore){
+        ArrayList<String> tab_key = new ArrayList<>();
+        tab_key.add(Category.CATEGORY);
+        tab_key.add(Author.AUTHOR);
+        Key key = Key.createKey(tab_key);
+        return kvStore.storeIterator(Direction.UNORDERED, 0, key, null, null);
+    }
+
 
     public static Book getBookFromTitle(String title){
         KVStore kvStore = getKvstore();
@@ -107,24 +119,10 @@ public class Utils {
     }
 
     /**
-     * Get value from a given key
-     * @param store: KVStore
-     * @param key: key to find
-     * @return : String
-     */
-    public String getValueFromStore(KVStore store, Key key){
-        ValueVersion valueVersion = store.get(key);
-        Value value = valueVersion.getValue();
-        byte[] table = value.getValue();
-        return new String(table);
-    }
-
-
-    /**
      * Get  random integer in prodided range
      * @param min_: minimal value
      * @param max_: maximal value
-     * @return: random integer
+     * @return random integer
      */
     public static int getRandomInteger(int min_, int max_){
         return (new Random()).nextInt((max_ - min_) + 1) + min_;
@@ -137,5 +135,45 @@ public class Utils {
     public static String generateRandomAuthorName(){
         int num = Utils.getRandomInteger(0, Parameters.NB_AUTHOR_PER_THREAD*Parameters.NB_THREAD_CREATION);
         return  "Author_" + num;
+    }
+
+
+    public static ArrayList<String> getAllBooksTitle(KVStore kvStore){
+        ArrayList<String> list_titles = new ArrayList<>();
+        ArrayList<String> tab_key = new ArrayList<>();
+        tab_key.add(Book.BOOK);
+        Key key = Key.createKey(tab_key);
+        Iterator<KeyValueVersion> i =  kvStore.storeIterator(Direction.UNORDERED, 0, key, null, null);
+        while(i.hasNext()){
+            Key k = i.next().getKey();
+
+            String book_str = Utils.getValueFromKey(kvStore, k);
+
+            Book book = new Book();
+            book.deserialize(book_str);
+
+            list_titles.add(book.getTitle());
+        }
+
+        return list_titles;
+    }
+
+    public static ArrayList<String> getAllAuthorsName(KVStore kvStore){
+        ArrayList<String> list_titles = new ArrayList<>();
+        ArrayList<String> tab_key = new ArrayList<>();
+        tab_key.add(Author.AUTHOR);
+        Key key = Key.createKey(tab_key);
+        Iterator<KeyValueVersion> i =  kvStore.storeIterator(Direction.UNORDERED, 0, key, null, null);
+        while(i.hasNext()){
+            Key k = i.next().getKey();
+
+            String author_str = Utils.getValueFromKey(kvStore, k);
+
+            Author author = new Author();
+            author.deserialize(author_str);
+
+            list_titles.add(author.getlastName());
+        }
+        return list_titles;
     }
 }

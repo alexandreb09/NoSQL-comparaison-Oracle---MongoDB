@@ -2,7 +2,6 @@ package thread;
 
 import entity.oracle.Author;
 import entity.oracle.Book;
-import main.Parameters;
 import main.Utils;
 import oracle.kv.KVStore;
 
@@ -23,7 +22,7 @@ public class AuthorBookInsertThread extends Thread {
 
     public void run() {
         KVStore kvStore = Utils.getKvstore();
-        System.out.println("min: " + this.min + "\tmax: "+ max);
+//        System.out.println("min: " + this.min + "\tmax: "+ max);
 
         // In ONE thread, insertion follows a "for" loop => items are introduced ordered
         // Here we either add them in increasing or decreasing order
@@ -51,8 +50,8 @@ public class AuthorBookInsertThread extends Thread {
     public void insert(KVStore kvStore, int i){
         // Create entities
         Author author = Author.randomAuthor(i);
-        Book book1 = Book.createRandomBook(i);
-        Book book2 = Book.createRandomBook(i + Parameters.BOOK_AUTHOR_MODULO);
+        Book book1 = Book.createRandomBook();
+        Book book2 = Book.createRandomBook();
 
         // Add "relations"
         book1.addAuthor(author);
