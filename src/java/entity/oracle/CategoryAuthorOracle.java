@@ -1,6 +1,7 @@
 package entity.oracle;
 
-import main.Utils;
+import entity.Category;
+import main.UtilsOracle;
 import oracle.kv.*;
 
 import java.util.ArrayList;
@@ -8,15 +9,25 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-public class CategoryAuthor extends Category {
+public class CategoryAuthorOracle extends Category {
 
-    private ArrayList<Author> authors;
+    /* ************************************ */
+    /*              FIELDS                  */
+    /* ************************************ */
+    private ArrayList<AuthorOracle> authors;
 
 
-    public CategoryAuthor() {
+    /* ************************************ */
+    /*          CONSTRUCTORS                */
+    /* ************************************ */
+    public CategoryAuthorOracle() {
         this.authors = new ArrayList<>();
     }
 
+
+    /* ************************************ */
+    /*             FUNCTIONS                */
+    /* ************************************ */
     /**
      * Get a kvStore key
      * Key build following the hierarchy:
@@ -30,7 +41,7 @@ public class CategoryAuthor extends Category {
 
         // Add category type
         tab_key.add(Category.CATEGORY);
-        tab_key.add(Author.AUTHOR);
+        tab_key.add(AuthorOracle.AUTHOR);
 
         // Add category
         tab_key.add(this.getCategory());
@@ -40,7 +51,7 @@ public class CategoryAuthor extends Category {
 
     public String serialize(){
         StringBuilder out = new StringBuilder(getCategory());
-        for (Author author: authors) {
+        for (AuthorOracle author: authors) {
             out.append("¤").append(author.serializePartial());
         }
         return out.toString();
@@ -57,7 +68,7 @@ public class CategoryAuthor extends Category {
         }
         if (fields.size() > 1){
             for (int i = 1; i < (fields.size() - 1) / 3; i = i + 3){
-                Author author = new Author();
+                AuthorOracle author = new AuthorOracle();
                 author.setlastName(fields.get(i));
                 author.setfirstName(fields.get(i + 1));
                 author.setlocation(fields.get(i + 2));
@@ -66,16 +77,16 @@ public class CategoryAuthor extends Category {
         }
     }
 
-    public static void addToKvStore(KVStore kvStore, Author author, String category){
+    public static void addToKvStore(KVStore kvStore, AuthorOracle author, String category){
         // Create entity
-        CategoryAuthor categoryAuthor = new CategoryAuthor();
+        CategoryAuthorOracle categoryAuthor = new CategoryAuthorOracle();
         Key categoryAuthorKey;
         Value value;
 
         // Create key (search for already existing CategoryBook)
         ArrayList<String> tab_key = new ArrayList<>();
         tab_key.add(Category.CATEGORY);
-        tab_key.add(Author.AUTHOR);
+        tab_key.add(AuthorOracle.AUTHOR);
         tab_key.add(category);
         Key myKey = Key.createKey(tab_key);
 
@@ -86,7 +97,7 @@ public class CategoryAuthor extends Category {
             // Get categoryBook KEY
             categoryAuthorKey = i.next().getKey();
             // Fill entity from DataBase value
-            String categoryAuthorStr = Utils.getValueFromKey(kvStore, categoryAuthorKey);
+            String categoryAuthorStr = UtilsOracle.getValueFromKey(kvStore, categoryAuthorKey);
 
             // Add the author directly to the string kvstore value without deserialisation
             categoryAuthorStr = categoryAuthorStr + "¤" + author.serializePartial();
@@ -116,15 +127,15 @@ public class CategoryAuthor extends Category {
     /* ************************************ */
     /*            Getter - setter           */
     /* ************************************ */
-    public ArrayList<Author> getAuthor(){
+    public ArrayList<AuthorOracle> getAuthor(){
         return authors;
     }
 
-    public void addAuthor(Author author){
+    public void addAuthor(AuthorOracle author){
         this.authors.add(author);
     }
 
-    public void removeAuthor(Author author){
+    public void removeAuthor(AuthorOracle author){
         this.authors.remove(author);
     }
 }

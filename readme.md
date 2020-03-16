@@ -1,3 +1,15 @@
+### Environnemnt 
+
+- Oracle NoSQL : kvstore v18.1.27
+    - Running in "insecure mode" with `java -jar lib/kvstore.jar kvlite -secure-config disable`
+    - Add the `kvstore/lib` folder to the project dependencies
+    
+- MongoDB : v4.2.3
+    - Run mongo db in terminal
+
+- Java : JDK 1.8
+- IntelliJ 11.0.9
+
 ### Potential issues:
 
 - Starting Oracle KVLite server:

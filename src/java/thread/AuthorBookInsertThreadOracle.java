@@ -1,27 +1,27 @@
 package thread;
 
-import entity.oracle.Author;
-import entity.oracle.Book;
-import main.Utils;
+import entity.oracle.AuthorOracle;
+import entity.oracle.BookOracle;
+import main.UtilsOracle;
 import oracle.kv.KVStore;
 
 import java.util.concurrent.CountDownLatch;
 
-public class AuthorBookInsertThread extends Thread {
+public class AuthorBookInsertThreadOracle extends Thread {
 
     private int min;
     private int max;
 
     CountDownLatch latch;
 
-    public AuthorBookInsertThread(CountDownLatch latch_, int min_, int max_){
+    public AuthorBookInsertThreadOracle(CountDownLatch latch_, int min_, int max_){
         this.latch = latch_;
         this.min = min_;
         this.max = max_;
     }
 
     public void run() {
-        KVStore kvStore = Utils.getKvstore();
+        KVStore kvStore = UtilsOracle.getKvstore();
 //        System.out.println("min: " + this.min + "\tmax: "+ max);
 
         // In ONE thread, insertion follows a "for" loop => items are introduced ordered
@@ -36,22 +36,22 @@ public class AuthorBookInsertThread extends Thread {
     }
 
     public void addCroissant(KVStore kvStore){
-        for (int i = this.min; i < this.max; ++i){
+        for (int i = this.min; i <= this.max; ++i){
             insert(kvStore, i);
         }
     }
 
     public void addDecroissant(KVStore kvStore){
-        for (int i = this.max; i > this.min; --i){
+        for (int i = this.max; i >= this.min; --i){
             insert(kvStore, i);
         }
     }
 
     public void insert(KVStore kvStore, int i){
         // Create entities
-        Author author = Author.randomAuthor(i);
-        Book book1 = Book.createRandomBook();
-        Book book2 = Book.createRandomBook();
+        AuthorOracle author = AuthorOracle.randomAuthor(i);
+        BookOracle book1 = BookOracle.createRandomBook();
+        BookOracle book2 = BookOracle.createRandomBook();
 
         // Add "relations"
         book1.addAuthor(author);
@@ -60,8 +60,8 @@ public class AuthorBookInsertThread extends Thread {
         author.addBook(book2);
 
         // Insert entities in Oracle Store
-        Utils.addAuthorInKvstore(kvStore, author);
-        Utils.addBookInKvstore(kvStore, book1);
-        Utils.addBookInKvstore(kvStore, book2);
+        UtilsOracle.addAuthorInKvstore(kvStore, author);
+        UtilsOracle.addBookInKvstore(kvStore, book1);
+        UtilsOracle.addBookInKvstore(kvStore, book2);
     }
 }

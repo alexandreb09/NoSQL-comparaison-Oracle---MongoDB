@@ -1,23 +1,13 @@
-package entity.oracle;
+package entity;
 
 import main.Parameters;
-import oracle.kv.Key;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 public abstract class Category {
     public static final String CATEGORY = "CATEGORY";
 
     private String category;
-
-    /**
-     * Set a random category
-     */
-    public void setRandomCategory(){
-        this.category = getRandomCategory();
-    }
-
 
     /* ************************************ */
     /*             Static methods           */

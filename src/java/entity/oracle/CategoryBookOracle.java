@@ -1,6 +1,7 @@
 package entity.oracle;
 
-import main.Utils;
+import entity.Category;
+import main.UtilsOracle;
 import oracle.kv.*;
 
 import java.util.ArrayList;
@@ -8,19 +9,30 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-public class CategoryBook extends Category {
+public class CategoryBookOracle extends Category {
 
-    private ArrayList<Book> books;
+    /* ************************************ */
+    /*              FIELDS                  */
+    /* ************************************ */
+    private ArrayList<BookOracle> books;
 
     private String letter;
 
-    public CategoryBook() {
+
+    /* ************************************ */
+    /*          CONSTRUCTORS                */
+    /* ************************************ */
+    public CategoryBookOracle() {
         this.books = new ArrayList<>();
     }
 
+
+    /* ************************************ */
+    /*             FUNCTIONS                */
+    /* ************************************ */
     public String serialize(){
         StringBuilder out = new StringBuilder(getCategory() + "¤" + getLetter());
-        for (Book book: books) {
+        for (BookOracle book: books) {
             out.append("¤").append(book.serializePartial());
         }
         return out.toString();
@@ -34,11 +46,11 @@ public class CategoryBook extends Category {
         List<String> fields = Arrays.asList(str_categories.split("¤"));
         if (fields.size() >= 2){
             this.setCategory(fields.get(0));
-            this.setLetter(Book.getTitleLetter(fields.get(1)));
+            this.setLetter(BookOracle.getTitleLetter(fields.get(1)));
         }
         if (fields.size() > 2){
             for (int i = 2; i < (fields.size() - 2) / 3; i = i + 3){
-                Book book = new Book();
+                BookOracle book = new BookOracle();
                 book.setTitle(fields.get(i));
                 book.setPrice(fields.get(i + 1));
                 book.setCategory(fields.get(i + 2));
@@ -47,18 +59,18 @@ public class CategoryBook extends Category {
         }
     }
 
-    public static void addToKvStore(KVStore kvStore, Book book){
+    public static void addToKvStore(KVStore kvStore, BookOracle book){
         // Create entity
-        CategoryBook categoryBook = new CategoryBook();
+        CategoryBookOracle categoryBook = new CategoryBookOracle();
         Key categoryBookKey;
         Value value;
 
         // Create key (search for already existing CategoryBook)
         ArrayList<String> tab_key = new ArrayList<>();
         tab_key.add(Category.CATEGORY);
-        tab_key.add(Book.BOOK);
+        tab_key.add(BookOracle.BOOK);
         tab_key.add(book.getCategory());
-        tab_key.add(Book.getTitleLetter(book.getTitle()));
+        tab_key.add(BookOracle.getTitleLetter(book.getTitle()));
         Key myKey = Key.createKey(tab_key);
 
         // Get iterator from a key
@@ -68,7 +80,7 @@ public class CategoryBook extends Category {
             // Get categoryBook KEY
             categoryBookKey = i.next().getKey();
             // Fill entity from DataBase value
-            String categoryBookStr = Utils.getValueFromKey(kvStore, categoryBookKey);
+            String categoryBookStr = UtilsOracle.getValueFromKey(kvStore, categoryBookKey);
 
             // Add the author direclty to the string kvstore value without deserialisation
             categoryBookStr = categoryBookStr + "¤" + book.serializePartial();
@@ -80,7 +92,7 @@ public class CategoryBook extends Category {
         else{
             // Fill categoryBook entity
             categoryBook.setCategory(book.getCategory());
-            categoryBook.setLetter(Book.getTitleLetter(book.getTitle()));
+            categoryBook.setLetter(BookOracle.getTitleLetter(book.getTitle()));
 
             // Create the key
             categoryBookKey = categoryBook.getKey();
@@ -109,7 +121,7 @@ public class CategoryBook extends Category {
 
         // Add category type
         tab_key.add(Category.CATEGORY);
-        tab_key.add(Book.BOOK);
+        tab_key.add(BookOracle.BOOK);
 
         // Add category
         tab_key.add(this.getCategory());
@@ -123,15 +135,15 @@ public class CategoryBook extends Category {
     /* ************************************ */
     /*            Getter - setter           */
     /* ************************************ */
-    public ArrayList<Book> getBooks(){
+    public ArrayList<BookOracle> getBooks(){
         return books;
     }
 
-    public void addBook(Book book){
+    public void addBook(BookOracle book){
         this.books.add(book);
     }
 
-    public void removeBook(Book book){
+    public void removeBook(BookOracle book){
         this.books.remove(book);
     }
 
